@@ -6,12 +6,14 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
+
+from pkg_resources import resource_filename
 
 BOT_NAME = "InterviewTest"
 
 SPIDER_MODULES = ["InterviewTest.spiders"]
 NEWSPIDER_MODULE = "InterviewTest.spiders"
-
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
@@ -25,7 +27,7 @@ CONCURRENT_REQUESTS = 2
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -56,15 +58,16 @@ DEFAULT_REQUEST_HEADERS = {
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-# }
+EXTENSIONS = {
+    "spidermon.contrib.scrapy.extensions.Spidermon": 500,
+}
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'InterviewTest.pipelines.InterviewtestPipeline': 300,
-# }
+
+ITEM_PIPELINES = {
+    "spidermon.contrib.scrapy.pipelines.ItemValidationPipeline": 800,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -86,3 +89,16 @@ DEFAULT_REQUEST_HEADERS = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+RETRY_TIMES = 10
+RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429]
+
+# monitoring and test case for data validation
+SPIDERMON_ENABLED = True
+SPIDERMON_VALIDATION_SCHEMAS = [
+    resource_filename(__name__, os.path.join("schema", "steamcommunity.json"))
+]
+
+SPIDERMON_SPIDER_CLOSE_MONITORS = ("InterviewTest.monitors.SpiderCloseMonitorSuite",)
+
