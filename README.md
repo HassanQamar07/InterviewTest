@@ -27,6 +27,9 @@ scrapy crawl steamcommunity -t csv -0 steamcommunity.csv
 ```
 this will export the data to steamcomminity.csv file
 
+## Spider Code
+
+The main part of the spider is in `InterviewTest/spiders/steamcommunity.py` file. This file contains the logic to scrape the data from the steamcommunity website.
 
 ## Test Requirements
 
