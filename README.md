@@ -23,7 +23,7 @@ scrapy crawl steamcommunity
 
 Scrapy by default support CSV export, we don't have to customize or code for it. To crawl the data and export into CSV use following command
 ```bash
-scrapy crawl steamcommunity -t csv -0 steamcommunity.csv
+scrapy crawl steamcommunity -t csv -o steamcommunity.csv
 ```
 this will export the data to steamcomminity.csv file
 
@@ -32,7 +32,7 @@ this will export the data to steamcomminity.csv file
 
 Scrapy by default support JSON export, we don't have to customize or code for it. To crawl the data and export into CSV use following command
 ```bash
-scrapy crawl steamcommunity -t json -0 steamcommunity.json
+scrapy crawl steamcommunity -t json -o steamcommunity.json
 ```
 this will export the data to steamcomminity.csv file
 
