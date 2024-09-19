@@ -11,19 +11,46 @@ from InterviewTest.items import SteamCommunityItem, SteamCommunityItemLoader
 class SteamcommunitySpider(scrapy.Spider):
     name = "steamcommunity"
     allowed_domains = ["steamcommunity.com"]
-    start_urls = ["https://steamcommunity.com/market/search?q="]
 
     app_data_regex = re.compile(r"var g_rgAssets\s*=\s*(.*);", flags=re.MULTILINE)
+
+    RESULTS_PER_PAGE = 10
 
     def start_requests(self) -> Iterable[Request]:
         if getattr(self, "game_url", None):
             yield Request(self.game_url, callback=self.parse_game)
         else:
-            for url in self.start_urls:
-                yield Request(url, callback=self.parse)
+            yield self.get_search_request(1)
 
-    def parse(self, response):
-        pass
+    def get_search_request(self, page=1):
+        URL = "https://steamcommunity.com/market/search/render/"
+        start = (page - 1) * self.RESULTS_PER_PAGE
+        return scrapy.FormRequest(
+            URL,
+            method="GET",
+            formdata={
+                "query": "",
+                "start": str(start),
+                "count": str(self.RESULTS_PER_PAGE),
+                "search_descriptions": "",
+                "sort_column": "popular",
+                "sort_dir": "desc",
+            },
+            callback=self.parse_search,
+            cb_kwargs={"page": page},
+        )
+
+    def parse_search(self, response, page: int):
+        data = json.loads(response.text)
+        html = data["results_html"]
+        html_selector = scrapy.Selector(text=html)
+        for item in html_selector.xpath(
+            './/a[@class="market_listing_row_link"]/@href'
+        ).extract():
+            yield scrapy.Request(item, callback=self.parse_game)
+
+        if page < 50:
+            yield self.get_search_request(page + 1)
 
     def parse_game(self, response) -> Request:
         item_loader = SteamCommunityItemLoader(selector=response)
@@ -46,7 +73,7 @@ class SteamcommunitySpider(scrapy.Spider):
 
         item_loader.add_value("url", response.url)
         item_loader.add_value("name", app_info_data["name"])
-        item_loader.add_value("type", app_info_data["name"])
+        item_loader.add_value("type", app_info_data["type"])
         item_loader.add_value(
             "description", [d["value"] for d in app_info_data["descriptions"]]
         )
