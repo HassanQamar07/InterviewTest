@@ -27,6 +27,15 @@ scrapy crawl steamcommunity -t csv -0 steamcommunity.csv
 ```
 this will export the data to steamcomminity.csv file
 
+
+## Exporting the data to JSON
+
+Scrapy by default support JSON export, we don't have to customize or code for it. To crawl the data and export into CSV use following command
+```bash
+scrapy crawl steamcommunity -t json -0 steamcommunity.json
+```
+this will export the data to steamcomminity.csv file
+
 ## Spider Code
 
 The main part of the spider is in `InterviewTest/spiders/steamcommunity.py` file. This file contains the logic to scrape the data from the steamcommunity website.
