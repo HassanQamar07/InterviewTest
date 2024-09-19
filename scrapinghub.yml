@@ -1,7 +1,7 @@
 projects:
   default:
     id: 440735
-stack: scrapy:2.10
+stack: scrapy:2.11
 version: AUTO
 requirements:
   file: ./requirements.txt

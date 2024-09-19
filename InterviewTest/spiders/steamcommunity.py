@@ -6,6 +6,7 @@ import scrapy
 from scrapy import Request
 
 from InterviewTest.items import SteamCommunityItem, SteamCommunityItemLoader
+from InterviewTest.settings import RETRY_TIMES
 
 
 class SteamcommunitySpider(scrapy.Spider):
@@ -45,7 +46,7 @@ class SteamcommunitySpider(scrapy.Spider):
         html = data["results_html"]
         html_selector = scrapy.Selector(text=html)
         for item in html_selector.xpath(
-            './/a[@class="market_listing_row_link"]/@href'
+                './/a[@class="market_listing_row_link"]/@href'
         ).extract():
             yield scrapy.Request(item, callback=self.parse_game)
 
@@ -53,6 +54,17 @@ class SteamcommunitySpider(scrapy.Spider):
             yield self.get_search_request(page + 1)
 
     def parse_game(self, response) -> Request:
+        if "There was an error getting listings for this item. Please try again later." in response.text:
+            retry_time = response.meta.get("retry_time", 0)
+            if retry_time > RETRY_TIMES:
+                self.logger.error(f"Max retry reached for {response.url}")
+                return
+            return scrapy.Request(
+                response.url,
+                meta={"dont_cache": True, "retry_time": retry_time + 1},
+                dont_filter=True,
+                callback=self.parse_game
+            )
         item_loader = SteamCommunityItemLoader(selector=response)
 
         # all the related data about the item is in javascript tag.
@@ -81,6 +93,8 @@ class SteamcommunitySpider(scrapy.Spider):
         item_loader.add_xpath(
             "image", ".//div[@class='market_listing_largeimage']/img/@src"
         )
+
+        item_loader.add_xpath("game_name", ".//span[@class=\"market_listing_game_name\"]/text()")
 
         # the historical price data is in a list of lists in format [date and time, price, count]
 
