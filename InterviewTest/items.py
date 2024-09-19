@@ -39,4 +39,4 @@ class SteamCommunityItemLoader(itemloaders.ItemLoader):
     historical_price_in = itemloaders.processors.Identity()
     historical_price_out = itemloaders.processors.Identity()
 
-    description_out = itemloaders.processors.Join("\n")
+    description_out = itemloaders.processors.Join(" ")

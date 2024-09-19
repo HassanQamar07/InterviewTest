@@ -90,7 +90,7 @@ class SteamcommunitySpider(scrapy.Spider):
         item_loader.add_value("name", app_info_data["name"])
         item_loader.add_value("type", app_info_data["type"])
         item_loader.add_value(
-            "description", [d["value"] for d in app_info_data["descriptions"]]
+            "description", [d["value"].strip() for d in app_info_data["descriptions"]]
         )
 
         item_loader.add_xpath(
